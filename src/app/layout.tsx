@@ -9,7 +9,7 @@ export const metadata = {
     siteName: 'Base Smart Wallet Profiler',
     images: [
       {
-        url: '/opengraph-image.jpg', // This works perfectly because we moved it to the public folder!
+        url: '/opengraph-image.jpg', 
         width: 1200,
         height: 630,
         alt: 'Base Smart Wallet Profiler Dashboard',
@@ -23,5 +23,9 @@ export const metadata = {
     title: 'Base Smart Wallet Profiler',
     description: 'Separating the New Retail Wave from Crypto Natives onchain.',
     images: ['/opengraph-image.jpg'], 
+  },
+  // 👇 ADD THIS NEW BLOCK RIGHT HERE 👇
+  other: {
+    'base:app_id': '69f77f5b879b4ae3fa1c70a1',
   },
 };
