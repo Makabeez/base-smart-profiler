@@ -1,6 +1,27 @@
-# Base Smart Wallet Profiler
+<p align="center">
+  <img src="./public/opengraph-image.jpg" alt="Base Smart Wallet Profiler" width="800"/>
+</p>
 
-> Separating the **New Retail Wave** from **Crypto Natives** on Base.
+<p align="center">
+  <strong>Separating the New Retail Wave from Crypto Natives onchain.</strong>
+</p>
+
+<p align="center">
+  <a href="https://base-smart-profiler.vercel.app"><img alt="Live Demo" src="https://img.shields.io/badge/Live%20Demo-base--smart--profiler.vercel.app-0052FF?style=for-the-badge"/></a>
+  <a href="https://basescan.org/address/0x3F9F8222D7c3D3363A9394BD51d2c6B17e772413"><img alt="Contract" src="https://img.shields.io/badge/Contract-Base%20Mainnet-0052FF?style=for-the-badge&logo=ethereum&logoColor=white"/></a>
+  <img alt="License" src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge"/>
+  <img alt="Built on Base" src="https://img.shields.io/badge/Built%20on-Base-0052FF?style=for-the-badge"/>
+</p>
+
+<p align="center">
+  <img alt="Next.js" src="https://img.shields.io/badge/Next.js%2016-black?style=flat-square&logo=next.js"/>
+  <img alt="React" src="https://img.shields.io/badge/React%2019-61DAFB?style=flat-square&logo=react&logoColor=black"/>
+  <img alt="OnchainKit" src="https://img.shields.io/badge/OnchainKit-0052FF?style=flat-square"/>
+  <img alt="ERC-8021" src="https://img.shields.io/badge/ERC--8021-Builder%20Code-purple?style=flat-square"/>
+  <img alt="Paymaster" src="https://img.shields.io/badge/Gas-Sponsored-orange?style=flat-square"/>
+</p>
+
+---
 
 A live dashboard that visualizes how Coinbase Smart Wallet users (the new retail wave) behave fundamentally differently from traditional EOA holders (the crypto natives) on the Base network — plus a self-classify flow that mints you a **gasless soulbound on-chain receipt**.
 
