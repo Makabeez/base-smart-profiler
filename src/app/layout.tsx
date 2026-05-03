@@ -1,4 +1,7 @@
-export const metadata = {
+import type { Metadata } from "next";
+import "./globals.css";
+
+export const metadata: Metadata = {
   metadataBase: new URL('https://base-smart-profiler.vercel.app'),
   title: 'Base Smart Wallet Profiler',
   description: 'Separating the New Retail Wave from Crypto Natives onchain.',
@@ -9,7 +12,7 @@ export const metadata = {
     siteName: 'Base Smart Wallet Profiler',
     images: [
       {
-        url: '/opengraph-image.jpg', 
+        url: '/opengraph-image.jpg',
         width: 1200,
         height: 630,
         alt: 'Base Smart Wallet Profiler Dashboard',
@@ -22,10 +25,23 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Base Smart Wallet Profiler',
     description: 'Separating the New Retail Wave from Crypto Natives onchain.',
-    images: ['/opengraph-image.jpg'], 
-  },
-  // 👇 ADD THIS NEW BLOCK RIGHT HERE 👇
-  other: {
-    'base:app_id': '69f77f5b879b4ae3fa1c70a1',
+    images: ['/opengraph-image.jpg'],
   },
 };
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <head>
+        <meta name="base:app_id" content="69f77f5b879b4ae3fa1c70a1" />
+      </head>
+      <body className="antialiased">
+        {children}
+      </body>
+    </html>
+  );
+}
