@@ -1,5 +1,5 @@
 import { createConfig, http, cookieStorage, createStorage } from 'wagmi';
-import { base } from 'wagmi/chains';
+import { baseSepolia } from 'wagmi/chains';
 import { coinbaseWallet } from 'wagmi/connectors';
 import { Attribution } from 'ox/erc8021';
 
@@ -11,19 +11,18 @@ export const DATA_SUFFIX = BUILDER_CODE
   : undefined;
 
 export const config = createConfig({
-  chains: [base],
+  chains: [baseSepolia],
   connectors: [
     coinbaseWallet({
       appName: 'Base Smart Profiler',
-      preference: 'smartWalletOnly', // forces Smart Wallet, not EOA
+      preference: 'smartWalletOnly',
     }),
   ],
   storage: createStorage({ storage: cookieStorage }),
   ssr: true,
   transports: {
-    [base.id]: http(),
+    [baseSepolia.id]: http(),
   },
-  // This is the magic: every tx auto-appends your builder code
   ...(DATA_SUFFIX && { dataSuffix: DATA_SUFFIX }),
 });
 
