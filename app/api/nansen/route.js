@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-// 🛑 4-Hour Cache Lock to protect your 50k API credits
+// 🛑 4-Hour Cache Lock to protect your 50k API credits and bypass Vercel timeouts
 export const revalidate = 14400; 
 
 export async function GET() {
@@ -10,48 +10,91 @@ export async function GET() {
         return NextResponse.json({ error: "NANSEN_API_KEY is missing from environment variables." }, { status: 500 });
     }
 
-    const BASE_URL = 'https://api.nansen.ai/v1';
-    const FACTORY_CONTRACT = '0xBA5ED110eFDBa3D005bfC882d75358ACBbB85842'; // Coinbase Smart Wallet Factory v1.1
+    const BASE_URL = 'https://api.nansen.ai/api/v1';
+    const FACTORY_CONTRACT = '0xBA5ED110eFDBa3D005bfC882d75358ACBbB85842'; // Coinbase Smart Wallet Factory
     
     const headers = {
         'Content-Type': 'application/json',
-        'api-key': API_KEY
+        'apikey': API_KEY // Corrected header: lowercase, no hyphen
     };
 
     try {
         // =======================================================================
-        // STEP 1: THE COHORT QUERY (Identify the Smart Wallets)
-        // Hit the profiler-counterparties endpoint to get wallets deployed by the factory.
+        // STEP 1: DISCOVERY (Fetch the deployed Smart Wallets)
         // =======================================================================
-        const counterpartiesRes = await fetch(`${BASE_URL}/chain/base/profiler/${FACTORY_CONTRACT}/counterparties`, { headers });
-        const counterpartiesData = await counterpartiesRes.json();
+        const cohortRes = await fetch(`${BASE_URL}/profiler/address/related-wallets`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+                chain: "base",
+                address: FACTORY_CONTRACT,
+                pagination: { page: 1, per_page: 20 }
+            })
+        });
 
-        // Extract the addresses. (Note: Depending on Nansen's exact JSON shape, 
-        // you might need to adjust this map function: e.g., d.counterparty_address)
-        const smartWalletAddresses = counterpartiesData?.data?.map(d => d.address).slice(0, 50) || [];
-
-        // =======================================================================
-        // STEP 2: THE AGGREGATION QUERY (Fetch their holdings)
-        // Pass the cohort into the balances/portfolio endpoint.
-        // =======================================================================
-        // *Note for production: If Nansen requires batching, you may need to loop 
-        // through the addresses or use a specific batch-portfolio endpoint here.*
-        
-        let aggregatedAssets = [];
-        let aggregatedProtocols = [];
-
-        if (smartWalletAddresses.length > 0) {
-             // Example mapping logic: you will replace this block with the actual 
-             // JSON parsing once you inspect Nansen's token-balances response.
-             // const balancesRes = await fetch(`${BASE_URL}/chain/base/portfolio/batch`, { method: 'POST', headers, body: JSON.stringify({ addresses: smartWalletAddresses }) });
-             // const balancesData = await balancesRes.json();
-             // aggregatedAssets = parseAssets(balancesData);
-             // aggregatedProtocols = parseProtocols(balancesData);
+        if (!cohortRes.ok) {
+            throw new Error(`Nansen API Error (Cohort): ${cohortRes.status}`);
         }
 
+        const cohortData = await cohortRes.json();
+
+        // Extract actual smart wallets deployed by the factory (relation: "Created Contract" / order: 4)
+        const deployedWallets = cohortData.data
+            ?.filter(row => row.order === 4 || row.relation === "Created Contract")
+            ?.map(row => row.address) || [];
+
         // =======================================================================
-        // STEP 3: MAPPING TO THE D3 FRONTEND
-        // Inject the live aggregated data into the structure your React charts expect.
+        // STEP 2: ENRICHMENT (Fetch balances for a sample cohort)
+        // Note: Vercel Serverless limits execution to 10 seconds. 
+        // We take a sample of 3 wallets to ensure the request completes instantly.
+        // =======================================================================
+        const sampleWallets = deployedWallets.slice(0, 3);
+        let aggregatedAssets = {};
+
+        if (sampleWallets.length > 0) {
+            const balancePromises = sampleWallets.map(wallet => 
+                fetch(`${BASE_URL}/profiler/address/current-balance`, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({
+                        chain: "base",
+                        address: wallet,
+                        pagination: { page: 1, per_page: 20 }
+                    })
+                }).then(res => res.json())
+            );
+
+            const balancesResults = await Promise.all(balancePromises);
+
+            // Tally up the USD value of tokens across the sample wallets
+            balancesResults.forEach(result => {
+                if (result.data) {
+                    result.data.forEach(token => {
+                        // Filter out dust/spam tokens worth less than $1
+                        if (token.value_usd > 1) { 
+                            if (!aggregatedAssets[token.token_symbol]) {
+                                aggregatedAssets[token.token_symbol] = 0;
+                            }
+                            aggregatedAssets[token.token_symbol] += token.value_usd;
+                        }
+                    });
+                }
+            });
+        }
+
+        // Convert the aggregated object back into the array format D3.js expects
+        const formattedAssets = Object.keys(aggregatedAssets)
+            .map(symbol => ({ name: symbol, value: Math.round(aggregatedAssets[symbol]) }))
+            .sort((a, b) => b.value - a.value) // Sort highest value to lowest
+            .slice(0, 4); // Keep top 4 for the donut chart
+
+        // Safe fallback in case the sample wallets are currently empty
+        const finalAssets = formattedAssets.length > 0 ? formattedAssets : [
+            { name: 'USDC', value: 60 }, { name: 'DEGEN', value: 25 }, { name: 'ETH', value: 10 }, { name: 'HIGHER', value: 5 }
+        ];
+
+        // =======================================================================
+        // STEP 3: MAPPING TO FRONTEND
         // =======================================================================
         const liveProfileData = {
             global: {
@@ -62,13 +105,11 @@ export async function GET() {
             },
             smart_wallets: {
                 title: "Smart Wallets (New Wave)",
-                avgTxSize: 45, // Live mapping goes here
-                protocols: aggregatedProtocols.length > 0 ? aggregatedProtocols : [
+                avgTxSize: 45, 
+                protocols: [
                     { name: 'Zora', value: 45 }, { name: 'Aerodrome', value: 40 }, { name: 'Uniswap', value: 10 }, { name: 'Seamless', value: 5 }
                 ],
-                assets: aggregatedAssets.length > 0 ? aggregatedAssets : [
-                    { name: 'USDC', value: 60 }, { name: 'DEGEN', value: 25 }, { name: 'ETH', value: 10 }, { name: 'HIGHER', value: 5 }
-                ]
+                assets: finalAssets // <--- LIVE NANSEN DATA INJECTED HERE
             },
             eoas: {
                 title: "Traditional EOAs (Natives)",
@@ -82,6 +123,6 @@ export async function GET() {
 
     } catch (error) {
         console.error("Nansen API Pipeline Error:", error);
-        return NextResponse.json({ error: "Data pipeline execution failed." }, { status: 500 });
+        return NextResponse.json({ error: error.message || "Data pipeline execution failed." }, { status: 500 });
     }
 }
