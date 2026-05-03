@@ -1,15 +1,15 @@
 export const metadata = {
   metadataBase: new URL('https://base-smart-profiler.vercel.app'),
   title: 'Base Smart Wallet Profiler',
-  description: 'Tracking the new retail wave on Base through Coinbase Smart Wallet analytics.',
+  description: 'Separating the New Retail Wave from Crypto Natives onchain.',
   openGraph: {
     title: 'Base Smart Wallet Profiler',
-    description: 'Tracking the new retail wave on Base through Coinbase Smart Wallet analytics.',
+    description: 'Separating the New Retail Wave from Crypto Natives onchain.',
     url: 'https://base-smart-profiler.vercel.app',
     siteName: 'Base Smart Wallet Profiler',
     images: [
       {
-        url: '/opengraph-image.jpg', // Points to the file you just uploaded
+        url: '/opengraph-image.jpg', 
         width: 1200,
         height: 630,
         alt: 'Base Smart Wallet Profiler Dashboard',
@@ -21,7 +21,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Base Smart Wallet Profiler',
-    description: 'Tracking the new retail wave on Base through Coinbase Smart Wallet analytics.',
-    images: ['/opengraph-image.jpg'], // Crucial for X/Twitter previews!
+    description: 'Separating the New Retail Wave from Crypto Natives onchain.',
+    images: ['/opengraph-image.jpg'], 
   },
 };
