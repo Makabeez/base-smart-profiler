@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://base-smart-profiler.vercel.app'),
@@ -40,7 +41,7 @@ export default function RootLayout({
         <meta name="base:app_id" content="69f77f5b879b4ae3fa1c70a1" />
       </head>
       <body className="antialiased">
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
