@@ -1,5 +1,5 @@
 import { createConfig, http, cookieStorage, createStorage } from 'wagmi';
-import { baseSepolia } from 'wagmi/chains';
+import { base } from 'wagmi/chains';
 import { coinbaseWallet } from 'wagmi/connectors';
 import { Attribution } from 'ox/erc8021';
 
@@ -11,7 +11,7 @@ export const DATA_SUFFIX = BUILDER_CODE
   : undefined;
 
 export const config = createConfig({
-  chains: [baseSepolia],
+  chains: [base],
   connectors: [
     coinbaseWallet({
       appName: 'Base Smart Profiler',
@@ -21,7 +21,7 @@ export const config = createConfig({
   storage: createStorage({ storage: cookieStorage }),
   ssr: true,
   transports: {
-    [baseSepolia.id]: http(),
+    [base.id]: http(),
   },
   ...(DATA_SUFFIX && { dataSuffix: DATA_SUFFIX }),
 });

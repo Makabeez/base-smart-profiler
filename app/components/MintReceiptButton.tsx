@@ -60,7 +60,7 @@ export function MintReceiptButton({ analyzedWallet, category }: Props) {
   return (
     <div className="flex flex-col gap-2">
       <Transaction
-        chainId={84532}
+        chainId={8453}
         calls={calls as never}
         isSponsored={true}
         onStatus={handleStatus}
@@ -83,7 +83,7 @@ export function MintReceiptButton({ analyzedWallet, category }: Props) {
       {lastTxHash ? (
         
           <a
-          href={`https://sepolia.basescan.org/tx/${lastTxHash}`}
+          href={`https://basescan.org/tx/${lastTxHash}`}
           target="_blank"
           rel="noopener noreferrer"
           className="text-xs text-blue-400 hover:underline"

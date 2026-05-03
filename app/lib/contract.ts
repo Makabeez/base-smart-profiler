@@ -1,7 +1,7 @@
 import type { Abi } from 'viem';
 
 export const RECEIPT_CONTRACT_ADDRESS = process.env
-  .NEXT_PUBLIC_RECEIPT_CONTRACT_SEPOLIA as `0x${string}`;
+  .NEXT_PUBLIC_RECEIPT_CONTRACT as `0x${string}`;
 
 export const RECEIPT_ABI = [
   {
