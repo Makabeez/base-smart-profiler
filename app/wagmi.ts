@@ -1,14 +1,11 @@
 import { createConfig, http, cookieStorage, createStorage } from 'wagmi';
 import { base } from 'wagmi/chains';
 import { coinbaseWallet } from 'wagmi/connectors';
-import { Attribution } from 'ox/erc8021';
 
-// Convert raw builder code (bc_il5mvrgl) → ERC-8021 dataSuffix bytes
-const BUILDER_CODE = process.env.NEXT_PUBLIC_BUILDER_CODE_RAW;
-
-export const DATA_SUFFIX = BUILDER_CODE
-  ? Attribution.toDataSuffix({ codes: [BUILDER_CODE] })
-  : undefined;
+// NOTE: Builder Code attribution is handled in MintReceiptButton.tsx
+// by manually appending the ERC-8021 suffix from NEXT_PUBLIC_BUILDER_CODE
+// directly to the call's data field. wagmi's dataSuffix mechanism gets
+// stripped by the CDP Paymaster during AA repackaging.
 
 export const config = createConfig({
   chains: [base],
@@ -23,7 +20,6 @@ export const config = createConfig({
   transports: {
     [base.id]: http(),
   },
-  ...(DATA_SUFFIX && { dataSuffix: DATA_SUFFIX }),
 });
 
 declare module 'wagmi' {
