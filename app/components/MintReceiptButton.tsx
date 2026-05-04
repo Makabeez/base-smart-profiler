@@ -51,37 +51,37 @@ export function MintReceiptButton({ analyzedWallet, category }: Props) {
     setError(null);
 
     try {
-      // 1. Encode the mint() function call
-      const baseCalldata = encodeFunctionData({
+      // 1. Encode the mint() function call (NO manual suffix)
+      const calldata = encodeFunctionData({
         abi: RECEIPT_ABI,
         functionName: 'mint',
         args: [analyzedWallet, category],
       });
 
-      // 2. Append the ERC-8021 Builder Code suffix manually
-      // This bypasses paymaster suffix-stripping during AA repackaging
-      const builderCodeHex = process.env.NEXT_PUBLIC_BUILDER_CODE;
-      if (!builderCodeHex) {
+      const builderCode = process.env.NEXT_PUBLIC_BUILDER_CODE;
+      if (!builderCode) {
         throw new Error('NEXT_PUBLIC_BUILDER_CODE not configured');
       }
 
-      // Strip the 0x prefix from suffix and append to baseCalldata
-      const suffix = builderCodeHex.startsWith('0x')
-        ? builderCodeHex.slice(2)
-        : builderCodeHex;
-      const fullCalldata = (baseCalldata + suffix) as `0x${string}`;
-
-      // 3. Send via wagmi useSendCalls with paymaster sponsorship
+      // 2. Send via ERC-5792 sendCalls with the standard dataSuffix capability.
+      // This tells the Smart Wallet to append the ERC-8021 Builder Code
+      // to userOp.callData at the correct layer (last 16 bytes = ERC marker)
+      // so Base indexers can detect attribution.
+      // Per Base docs: https://docs.base.org/apps/builder-codes/wallet-developers
       sendCalls({
         calls: [
           {
             to: RECEIPT_CONTRACT_ADDRESS,
-            data: fullCalldata,
+            data: calldata,
           },
         ],
         capabilities: {
           paymasterService: {
             url: process.env.NEXT_PUBLIC_PAYMASTER_URL!,
+          },
+          dataSuffix: {
+            value: builderCode,
+            optional: true,
           },
         },
       });
